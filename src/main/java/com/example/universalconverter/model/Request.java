@@ -5,8 +5,8 @@ public class Request {
     private final String toUnits;
 
     public Request(String fromUnits, String toUnits) {
-        this.fromUnits = fromUnits.replaceAll(" ", "");
-        this.toUnits = toUnits.replaceAll(" ", "");
+        this.fromUnits = fromUnits.replaceAll(" ", "").toLowerCase();
+        this.toUnits = toUnits.replaceAll(" ", "").toLowerCase();
     }
 
     public String getFromUnits() {

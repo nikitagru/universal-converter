@@ -1,6 +1,7 @@
 package com.example.universalconverter.controller;
 
 import com.example.universalconverter.converter.Converter;
+import com.example.universalconverter.model.FoundException;
 import com.example.universalconverter.model.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,15 +21,19 @@ public class RequestController {
     private org.springframework.boot.ApplicationArguments applicationArguments;
 
     private String answer;
-    private Request userRequest;
 
     @PostMapping(value = "/convert", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Request> convert(@RequestBody Request request) {
-//        userRequest = new Request(request.getFromUnits(), request.getToUnits());
-//        Converter converter = new Converter();
-//        answer = converter.convertUnits(userRequest);
-        answer = request.toString();
-        return new ResponseEntity<Request>(new Request(request.getFromUnits(), request.getToUnits()), HttpStatus.OK);
+    public ResponseEntity<String> convert(@RequestBody Request request) {
+        Converter converter = new Converter();
+        answer = converter.convertUnits(request);
+
+        if (answer.equals(FoundException.BAD_REQUEST.name())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (answer.equals(FoundException.NOT_FOUND.name())) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(answer, HttpStatus.OK);
+        }
     }
 
     @GetMapping

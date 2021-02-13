@@ -1,40 +1,59 @@
 package com.example.universalconverter.converter;
 
+import com.example.universalconverter.model.FoundException;
 import com.example.universalconverter.model.Request;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.*;
 
 public class Converter {
-    public String convertUnits(Request request) {
-        String convertRule = findCurrent(request);
-        return convertRule.split(",")[2];
+
+    private String convertRule;
+    private FoundException foundException;
+
+    public FoundException getFoundException() {
+        return foundException;
     }
 
-    public String findCurrent(Request request) {
+    public String convertUnits(Request request) {
+        findRule(request);
+        if (foundException == FoundException.OK) {
+            return convertRule.split(",")[2];
+        } else {
+            return foundException.name();
+        }
+
+    }
+
+    public void findRule(Request request) {
         ClassLoader cl = getClass().getClassLoader();
         String path = cl.getResource("units.txt").getPath();
 
         try {
             File file = new File(path);
-            FileReader fr = new FileReader(file);
-            BufferedReader reader = new BufferedReader(fr);
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-            String line = reader.readLine();
+            foundException = FoundException.BAD_REQUEST;
+            String line = bufferedReader.readLine();
             while (line != null) {
-                String unitsFrom = line.split(",")[0].replaceAll(" ", "");
-                String unitsTo = line.split(",")[1].replaceAll(" ", "");
+                String unitsFrom = line.split(",")[0].replaceAll(" ", "").toLowerCase();
+                String unitsTo = line.split(",")[1].replaceAll(" ", "").toLowerCase();
                 if (request.getFromUnits().equals(unitsFrom) && request.getToUnits().equals(unitsTo)) {
-                    return line;
-                } else {
-
+                    foundException = FoundException.OK;
+                    convertRule = line;
+                } else if (request.getFromUnits().equals(unitsFrom) || request.getToUnits().equals(unitsTo)) {
+                    if (foundException != FoundException.OK) {
+                        foundException = FoundException.NOT_FOUND;
+                    }
                 }
-                line = reader.readLine();
+                line = bufferedReader.readLine();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
     }
 }
