@@ -18,12 +18,11 @@ public class Converter {
 
     public String convertUnits(Request request) {
         findRule(request);
-        if (foundException == FoundException.OK) {
+        if (convertRule != null) {
             return convertRule.split(",")[2];
         } else {
-            return foundException.name();
+            return "";
         }
-
     }
 
     public void findRule(Request request) {
@@ -32,23 +31,50 @@ public class Converter {
 
         try {
             File file = new File(path);
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 
             foundException = FoundException.BAD_REQUEST;
             String line = bufferedReader.readLine();
+
+            boolean isExistUnitsFrom = false;
+            boolean isExistUnitsTo = false;
+
             while (line != null) {
                 String unitsFrom = line.split(",")[0].replaceAll(" ", "").toLowerCase();
                 String unitsTo = line.split(",")[1].replaceAll(" ", "").toLowerCase();
+
+                if (request.getFromUnits().equals(unitsFrom)) {
+                    isExistUnitsFrom = true;
+                }
+                if (request.getToUnits().equals(unitsTo)) {
+                    isExistUnitsTo = true;
+                }
+
+                line = bufferedReader.readLine();
+            }
+
+            BufferedReader bfReader = new BufferedReader(new FileReader(file));
+            String convertLine = bfReader.readLine();
+
+
+            while (convertLine != null && isExistUnitsFrom && isExistUnitsTo) {
+                String unitsFrom = convertLine.split(",")[0].replaceAll(" ", "").toLowerCase();
+                String unitsTo = convertLine.split(",")[1].replaceAll(" ", "").toLowerCase();
+
                 if (request.getFromUnits().equals(unitsFrom) && request.getToUnits().equals(unitsTo)) {
                     foundException = FoundException.OK;
-                    convertRule = line;
-                } else if (request.getFromUnits().equals(unitsFrom) || request.getToUnits().equals(unitsTo)) {
+                    convertRule = convertLine;
+                } else if (request.getFromUnits().equals(unitsFrom)){
                     if (foundException != FoundException.OK) {
                         foundException = FoundException.NOT_FOUND;
                     }
                 }
-                line = bufferedReader.readLine();
+                if (request.getToUnits().equals(unitsTo)) {
+                    if (foundException != FoundException.OK) {
+                        foundException = FoundException.NOT_FOUND;
+                    }
+                }
+                convertLine = bfReader.readLine();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

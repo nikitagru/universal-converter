@@ -27,9 +27,9 @@ public class RequestController {
         Converter converter = new Converter();
         answer = converter.convertUnits(request);
 
-        if (answer.equals(FoundException.BAD_REQUEST.name())) {
+        if (converter.getFoundException() == FoundException.BAD_REQUEST) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else if (answer.equals(FoundException.NOT_FOUND.name())) {
+        } else if (converter.getFoundException() == FoundException.NOT_FOUND) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(answer, HttpStatus.OK);
