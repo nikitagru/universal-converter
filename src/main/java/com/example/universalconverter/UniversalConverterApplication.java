@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 @SpringBootApplication
 public class UniversalConverterApplication {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		SpringApplication.run(UniversalConverterApplication.class, args);
 	}
 

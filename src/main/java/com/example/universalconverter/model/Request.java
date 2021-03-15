@@ -1,27 +1,20 @@
 package com.example.universalconverter.model;
 
 public class Request {
-    private final String fromUnits;
-    private final String toUnits;
+    private final String from;
+    private final String to;
 
-    public Request(String fromUnits, String toUnits) {
-        this.fromUnits = fromUnits.replaceAll(" ", "").toLowerCase();
-        this.toUnits = toUnits.replaceAll(" ", "").toLowerCase();
+    public Request(String from, String to) {
+        this.from = from.replaceAll(" ", "").toLowerCase();
+        this.to = to.replaceAll(" ", "").toLowerCase();
     }
 
-    public String getFromUnits() {
-        return fromUnits;
+    public String getFrom() {
+        return from;
     }
 
-    public String getToUnits() {
-        return toUnits;
+    public String getTo() {
+        return to;
     }
 
-    @Override
-    public String toString() {
-        return "Request{" +
-                "fromUnits='" + fromUnits + '\'' +
-                ", toUnits='" + toUnits + '\'' +
-                '}';
-    }
 }

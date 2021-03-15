@@ -2,10 +2,12 @@ package com.example.universalconverter.converter;
 
 import com.example.universalconverter.model.FoundException;
 import com.example.universalconverter.model.Request;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 public class Converter {
 
@@ -19,7 +21,9 @@ public class Converter {
     public String convertUnits(Request request) {
         findRule(request);
         if (convertRule != null) {
-            return convertRule.split(",")[2];
+            MathContext context = new MathContext(15, RoundingMode.HALF_UP);
+            double answer = Double.parseDouble(convertRule.split(",")[2]);
+            return new BigDecimal(answer, context).toString();
         } else {
             return "";
         }
@@ -31,48 +35,22 @@ public class Converter {
 
         try {
             File file = new File(path);
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-
-            foundException = FoundException.BAD_REQUEST;
-            String line = bufferedReader.readLine();
-
-            boolean isExistUnitsFrom = false;
-            boolean isExistUnitsTo = false;
-
-            while (line != null) {
-                String unitsFrom = line.split(",")[0].replaceAll(" ", "").toLowerCase();
-                String unitsTo = line.split(",")[1].replaceAll(" ", "").toLowerCase();
-
-                if (request.getFromUnits().equals(unitsFrom)) {
-                    isExistUnitsFrom = true;
-                }
-                if (request.getToUnits().equals(unitsTo)) {
-                    isExistUnitsTo = true;
-                }
-
-                line = bufferedReader.readLine();
-            }
+            boolean isCorrect = isCorrectRequest(file, request);
 
             BufferedReader bfReader = new BufferedReader(new FileReader(file));
             String convertLine = bfReader.readLine();
 
-
-            while (convertLine != null && isExistUnitsFrom && isExistUnitsTo) {
+            while (convertLine != null && isCorrect) {
                 String unitsFrom = convertLine.split(",")[0].replaceAll(" ", "").toLowerCase();
                 String unitsTo = convertLine.split(",")[1].replaceAll(" ", "").toLowerCase();
 
-                if (request.getFromUnits().equals(unitsFrom) && request.getToUnits().equals(unitsTo)) {
+                if (request.getFrom().equals(unitsFrom) && request.getTo().equals(unitsTo)) {
                     foundException = FoundException.OK;
                     convertRule = convertLine;
-                } else if (request.getFromUnits().equals(unitsFrom)){
-                    if (foundException != FoundException.OK) {
-                        foundException = FoundException.NOT_FOUND;
-                    }
-                }
-                if (request.getToUnits().equals(unitsTo)) {
-                    if (foundException != FoundException.OK) {
-                        foundException = FoundException.NOT_FOUND;
-                    }
+                } else if ((request.getFrom().equals(unitsFrom) || request.getTo().equals(unitsTo))
+                            && foundException != FoundException.OK) {
+
+                    foundException = FoundException.NOT_FOUND;
                 }
                 convertLine = bfReader.readLine();
             }
@@ -81,5 +59,35 @@ public class Converter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isCorrectRequest(File file, Request request) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+
+        foundException = FoundException.BAD_REQUEST;
+        String line = bufferedReader.readLine();
+
+        boolean isExistUnitsFrom = false;
+        boolean isExistUnitsTo = false;
+
+        while (line != null) {
+            String unitsFrom = line.split(",")[0].replaceAll(" ", "").toLowerCase();
+            String unitsTo = line.split(",")[1].replaceAll(" ", "").toLowerCase();
+
+            if (request.getFrom().equals(unitsFrom)) {
+                isExistUnitsFrom = true;
+            }
+            if (request.getTo().equals(unitsTo)) {
+                isExistUnitsTo = true;
+            }
+
+            line = bufferedReader.readLine();
+        }
+
+        if (isExistUnitsFrom && isExistUnitsTo) {
+            return true;
+        }
+
+        return false;
     }
 }
