@@ -21,9 +21,8 @@ public class Converter {
     public String convertUnits(Request request) {
         findRule(request);
         if (convertRule != null) {
-            MathContext context = new MathContext(15, RoundingMode.HALF_UP);
-            double answer = Double.parseDouble(convertRule.split(",")[2]);
-            return new BigDecimal(answer, context).toString();
+            String roundedAnswer = roundAnswer(convertRule.split(",")[2]);
+            return roundedAnswer;
         } else {
             return "";
         }
@@ -89,5 +88,32 @@ public class Converter {
         }
 
         return false;
+    }
+
+    private String roundAnswer(String answer) {
+        String wholeNumber = answer.split("\\.")[0];
+        String fractionalNumber = answer.split("\\.")[1];
+
+        if (wholeNumber.length() > 1) {
+            int roundPower = 15 - wholeNumber.length();
+            DecimalFormat format = new DecimalFormat(createFormat(roundPower));
+            String newAnswer = format.format(Double.parseDouble(answer));
+            return newAnswer;
+        } else if (fractionalNumber.length() > 14) {
+            DecimalFormat format = new DecimalFormat("#.##############");
+            String newAnswer = format.format(Double.parseDouble(answer));
+            return newAnswer;
+        }
+
+        return answer;
+    }
+
+    private String createFormat(int roundPower) {
+        String format = "#.";
+        for (int i = 0; i < roundPower; i++) {
+            format += "#";
+        }
+
+        return format;
     }
 }
