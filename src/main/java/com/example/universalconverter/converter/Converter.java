@@ -13,12 +13,14 @@ public class Converter {
 
     private String convertRule;
     private FoundException foundException;
+    private String path;
 
     public FoundException getFoundException() {
         return foundException;
     }
 
-    public String convertUnits(Request request) {
+    public String convertUnits(Request request, String path) {
+        this.path = path;
         findRule(request);
         if (convertRule != null) {
             String roundedAnswer = roundAnswer(convertRule.split(",")[2]);
@@ -29,11 +31,10 @@ public class Converter {
     }
 
     public void findRule(Request request) {
-        ClassLoader cl = getClass().getClassLoader();
-        String path = cl.getResource("units.txt").getPath();
 
         try {
             File file = new File(path);
+            System.out.println(file.getAbsolutePath());
             boolean isCorrect = isCorrectRequest(file, request);
 
             BufferedReader bfReader = new BufferedReader(new FileReader(file));
@@ -83,28 +84,25 @@ public class Converter {
             line = bufferedReader.readLine();
         }
 
-        if (isExistUnitsFrom && isExistUnitsTo) {
-            return true;
-        }
-
-        return false;
+        return isExistUnitsFrom && isExistUnitsTo;
     }
 
     private String roundAnswer(String answer) {
-        String wholeNumber = answer.split("\\.")[0];
-        String fractionalNumber = answer.split("\\.")[1];
+        if (answer.matches("\\.")) {
+            String wholeNumber = answer.split("\\.")[0];
+            String fractionalNumber = answer.split("\\.")[1];
 
-        if (wholeNumber.length() > 1) {
-            int roundPower = 15 - wholeNumber.length();
-            DecimalFormat format = new DecimalFormat(createFormat(roundPower));
-            String newAnswer = format.format(Double.parseDouble(answer));
-            return newAnswer;
-        } else if (fractionalNumber.length() > 14) {
-            DecimalFormat format = new DecimalFormat("#.##############");
-            String newAnswer = format.format(Double.parseDouble(answer));
-            return newAnswer;
+            if (wholeNumber.length() > 1) {
+                int roundPower = 15 - wholeNumber.length();
+                DecimalFormat format = new DecimalFormat(createFormat(roundPower));
+                String newAnswer = format.format(Double.parseDouble(answer));
+                return newAnswer;
+            } else if (fractionalNumber.length() > 14) {
+                DecimalFormat format = new DecimalFormat("#.##############");
+                String newAnswer = format.format(Double.parseDouble(answer));
+                return newAnswer;
+            }
         }
-
         return answer;
     }
 

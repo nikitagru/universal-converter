@@ -25,7 +25,7 @@ public class RequestController {
     @PostMapping(value = "/convert", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> convert(@RequestBody Request request) {
         Converter converter = new Converter();
-        answer = converter.convertUnits(request);
+        answer = converter.convertUnits(request, "E:\\JavaProjects\\universal-converter\\src\\main\\resources\\units.txt"/*applicationArguments.getSourceArgs()[0]*/);
 
         if (converter.getFoundException() == FoundException.BAD_REQUEST) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
