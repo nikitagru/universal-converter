@@ -5,8 +5,19 @@ public class Request {
     private final String to;
 
     public Request(String from, String to) {
-        this.from = from.replaceAll(" ", "").toLowerCase();
-        this.to = to.replaceAll(" ", "").toLowerCase();
+        from = from.replaceAll(" ", "");
+        to = to.replaceAll(" ", "");
+
+        if (from.matches("(.*)/(.*)") && to.equals("")) {       // changing request from type "boo/foo" ""
+            this.from = from.split("/")[0];                         // to "boo" "foo"
+            this.to = from.split("/")[1];
+        } else if (from.equals("") && to.matches("(.*)/(.*)")) {
+            this.from = to.split("/")[0];
+            this.to = to.split("/")[1];
+        } else {
+            this.from = from.replaceAll(" ", "");
+            this.to = to.replaceAll(" ", "");
+        }
     }
 
     public String getFrom() {
@@ -16,5 +27,7 @@ public class Request {
     public String getTo() {
         return to;
     }
+
+
 
 }

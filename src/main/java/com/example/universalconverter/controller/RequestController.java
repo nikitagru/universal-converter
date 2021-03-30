@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 public class RequestController {
 
@@ -22,10 +20,17 @@ public class RequestController {
 
     private String answer;
 
-    @PostMapping(value = "/convert", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    /***
+     * Main method which converts units from request
+     * @param request a request from browser
+     * @return answer if it exist and HTTP answer code
+     */
+    @PostMapping(value = "/convert",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> convert(@RequestBody Request request) {
         Converter converter = new Converter();
-        answer = converter.convertUnits(request, "E:\\JavaProjects\\universal-converter\\src\\main\\resources\\units.txt"/*applicationArguments.getSourceArgs()[0]*/);
+        answer = converter.convertingUnits(request, applicationArguments.getSourceArgs()[0]);
 
         if (converter.getFoundException() == FoundException.BAD_REQUEST) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -36,11 +41,19 @@ public class RequestController {
         }
     }
 
+    /***
+     * Text for main page
+     * @return html page with text
+     */
     @GetMapping
     public String mainPage() {
         return "Сервис предоставляет единсвтенный метод POST /convert для передачи JSON в теле запроса";
     }
 
+    /***
+     * Print answer from method convert if answer exist
+     * @return html page with text
+     */
     @GetMapping("/convert")
     public String answer() {
         return answer;
