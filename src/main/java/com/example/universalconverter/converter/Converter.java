@@ -136,7 +136,7 @@ public class Converter {
     private String roundAnswer(String answer) {
         if (answer.contains(".")) {
             String wholeNumber = answer.split("\\.")[0].replaceAll(" ", "");
-            String fractionalNumber = answer.split("\\.")[1];
+            String fractionalNumber = answer.split("\\.")[1].replaceAll(" ", "");
 
             if (wholeNumber.length() > 1) {
                 int roundPower = 15 - wholeNumber.length();
